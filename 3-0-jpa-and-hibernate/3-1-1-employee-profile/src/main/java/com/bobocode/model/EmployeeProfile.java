@@ -1,5 +1,6 @@
 package com.bobocode.model;
 
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -16,9 +17,18 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
+@Entity
+@Table(name = "employee_profile")
 public class EmployeeProfile {
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
+    @MapsId
+    @OneToOne
+    @JoinColumn(name = "employee_id")
     private Employee employee;
+    @Column(nullable = false)
     private String position;
+    @Column(nullable = false)
     private String department;
 }
