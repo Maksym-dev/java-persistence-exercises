@@ -1,9 +1,14 @@
 package com.bobocode.dao;
 
 import com.bobocode.model.Photo;
-import com.bobocode.util.ExerciseNotCompletedException;
+import com.bobocode.model.PhotoComment;
 
+import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Root;
+
 import java.util.List;
 
 /**
@@ -18,26 +23,55 @@ public class PhotoDaoImpl implements PhotoDao {
 
     @Override
     public void save(Photo photo) {
-        throw new ExerciseNotCompletedException(); // todo
+        try (EntityManager entityManager = entityManagerFactory.createEntityManager()) {
+            entityManager.getTransaction().begin();
+            entityManager.persist(photo);
+            entityManager.getTransaction().commit();
+        }
     }
 
     @Override
     public Photo findById(long id) {
-        throw new ExerciseNotCompletedException(); // todo
+        EntityManager entityManager = entityManagerFactory.createEntityManager();
+        entityManager.getTransaction().begin();
+        Photo photo = entityManager.find(Photo.class, id);
+        entityManager.getTransaction().commit();
+        entityManager.close();
+        return photo;
     }
 
     @Override
     public List<Photo> findAll() {
-        throw new ExerciseNotCompletedException(); // todo
+        EntityManager entityManager = entityManagerFactory.createEntityManager();
+        entityManager.getTransaction().begin();
+        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Photo> query = criteriaBuilder.createQuery(Photo.class);
+        Root<Photo> fromPhotos = query.from(Photo.class);
+        query.select(fromPhotos);
+        List<Photo> photos = entityManager.createQuery(query).getResultList();
+        entityManager.getTransaction().commit();
+        entityManager.close();
+        return photos;
     }
 
     @Override
     public void remove(Photo photo) {
-        throw new ExerciseNotCompletedException(); // todo
+        EntityManager entityManager = entityManagerFactory.createEntityManager();
+        entityManager.getTransaction().begin();
+        Photo managed = entityManager.merge(photo);
+        entityManager.remove(managed);
+        entityManager.getTransaction().commit();
+        entityManager.close();
     }
 
     @Override
     public void addComment(long photoId, String comment) {
-        throw new ExerciseNotCompletedException(); // todo
+        try (EntityManager entityManager = entityManagerFactory.createEntityManager()) {
+            entityManager.getTransaction().begin();
+            Photo photoReference = entityManager.getReference(Photo.class, photoId);
+            PhotoComment photoComment = new PhotoComment(comment, photoReference);
+            entityManager.persist(photoComment);
+            entityManager.getTransaction().commit();
+        }
     }
 }
